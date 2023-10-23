@@ -29,3 +29,10 @@ $ npm install
 ```bash
 $ docker-compose up
 ```
+
+## Testing 
+
+```
+# check application status
+curl http://localhost:3000/health
+```
