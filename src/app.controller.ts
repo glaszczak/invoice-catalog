@@ -4,8 +4,8 @@ import { Controller, Get } from '@nestjs/common';
 export class AppController {
   constructor() {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('healthcheck')
+  async checkHealth(): Promise<string> {
+    return 'App is running!';
   }
 }
