@@ -20,7 +20,8 @@ export class HealthController {
   @HealthCheck()
   async check() {
     return this.healthCheckService.check([
-      async () => this.http.pingCheck('App', 'http://localhost:3000'),
+      async () =>
+        this.http.pingCheck('App', `${process.env.HOST}:${process.env.PORT}`),
       async () => this.rabbitMQHealthIndicator.isHealthy('RabbitMQ'),
       async () => this.emittedEventsIndicator.isHealthy('Emitted Events'),
     ]);

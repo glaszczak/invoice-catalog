@@ -18,7 +18,9 @@ This application is designed as a catalog to manage invoices, built using the Ne
 
 - **RabbitMQ Events**: The service emits an event to a RabbitMQ queue whenever a new invoice is added or removed.
 
-## Installation
+## Installation and Setup
+
+At the root of the project create a `.env` file based on `.env.example` and adjust the variables.
 
 ```bash
 $ npm install

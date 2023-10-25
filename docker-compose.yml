@@ -11,14 +11,14 @@ services:
     depends_on:
       - rabbitmq
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_QUEUE_NAME: invoice_queue
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME}
     networks:
       - backend
 
   rabbitmq:
     image: rabbitmq:3-management
-    hostname: rabbitmq
+    hostname: ${RABBITMQ_HOST}
     container_name: rabbitmq
     volumes:
       - /var/lib/rabbitmq
@@ -26,8 +26,8 @@ services:
       - '5672:5672'
       - '15672:15672'
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     networks:
       - backend
 

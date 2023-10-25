@@ -10,8 +10,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'RABBITMQ_CLIENT',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://admin:admin@rabbitmq:5672'],
-          queue: 'invoice_queue',
+          urls: [
+            `amqp://${process.env.RABBITMQ_DEFAULT_USER}:${process.env.RABBITMQ_DEFAULT_PASS}@${process.env.RABBITMQ_HOST}:5672`,
+          ],
+          queue: process.env.RABBITMQ_QUEUE_NAME,
           queueOptions: {
             durable: false,
           },
