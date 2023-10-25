@@ -34,5 +34,14 @@ $ docker-compose up
 
 ```
 # check application status
-curl http://localhost:3000/health
+curl http://localhost:3000/health | jq
+
+# get all invoices
+curl http://localhost:3000/invoices | jq
+
+# create an invoice
+curl -X POST -H "Content-Type: application/json" -d '{"purchaseDate":"2023-10-17","supplier":"Testing Supplier","customer":"Testing Customer","products":["Testing Product 1","Testing Product 2"],"netPrice":100,"tax":23}' localhost:3000/invoice | jq
+
+# delete single invoice
+curl -X DELETE -H "Content-Type: application/json" http://localhost:3000/invoice/[INVOICE_ID] | jq
 ```
