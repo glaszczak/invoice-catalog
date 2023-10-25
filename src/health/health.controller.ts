@@ -4,19 +4,25 @@ import {
   HealthCheckService,
   HttpHealthIndicator,
 } from '@nestjs/terminus';
+import { EmittedEventsIndicator } from './custom-indicators/emitted-events.indicator';
+import { RabbitMQHealthIndicator } from './custom-indicators/rabbitmq-health.indicator';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private healthCheckService: HealthCheckService,
     private http: HttpHealthIndicator,
+    private emittedEventsIndicator: EmittedEventsIndicator,
+    private rabbitMQHealthIndicator: RabbitMQHealthIndicator,
   ) {}
 
   @Get()
   @HealthCheck()
-  check() {
+  async check() {
     return this.healthCheckService.check([
-      async () => this.http.pingCheck('Healthcheck', 'http://localhost:3000'),
+      async () => this.http.pingCheck('App', 'http://localhost:3000'),
+      async () => this.rabbitMQHealthIndicator.isHealthy('RabbitMQ'),
+      async () => this.emittedEventsIndicator.isHealthy('Emitted Events'),
     ]);
   }
 }

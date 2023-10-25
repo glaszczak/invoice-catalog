@@ -33,7 +33,7 @@ $ docker-compose up
 ## Testing 
 
 ```
-# check application status
+# check application and RabbitMQ status
 curl http://localhost:3000/health | jq
 
 # get all invoices
@@ -45,3 +45,6 @@ curl -X POST -H "Content-Type: application/json" -d '{"purchaseDate":"2023-10-17
 # delete single invoice
 curl -X DELETE -H "Content-Type: application/json" http://localhost:3000/invoice/[INVOICE_ID] | jq
 ```
+
+RabbitMQ management:
+http://localhost:15672/

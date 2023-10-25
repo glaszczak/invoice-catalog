@@ -1,12 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as MOCKED_INVOICES from './invoices.json';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class InvoicesService {
   private currentInvoices = [];
+  private emittedEventsCount = 0;
 
-  constructor() {
+  constructor(@Inject('RABBITMQ_CLIENT') private rabbitmqClient: ClientProxy) {
     this.currentInvoices = [...MOCKED_INVOICES];
   }
 
@@ -39,6 +41,8 @@ export class InvoicesService {
 
     this.currentInvoices.push(newInvoice);
 
+    this.emitEvent('invoice_created', newInvoice.id);
+
     return {
       status: 'INVOICE_CREATED',
       created_invoice: newInvoice,
@@ -60,6 +64,8 @@ export class InvoicesService {
     );
     this.currentInvoices.length = 0;
     Array.prototype.push.apply(this.currentInvoices, filteredInvoices);
+
+    this.emitEvent('invoice_deleted', id);
 
     return {
       status: 'INVOICE_DELETED',
@@ -83,5 +89,17 @@ export class InvoicesService {
     const day = String(today.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  private emitEvent(eventName: string, invoiceId: number) {
+    this.rabbitmqClient.emit(eventName, {
+      invoice_id: invoiceId,
+      event_timestamp: new Date(),
+    });
+    this.emittedEventsCount += 1;
+  }
+
+  getEmittedEventsCount(): number {
+    return this.emittedEventsCount;
   }
 }
