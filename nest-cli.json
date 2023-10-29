@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/invoice-catalog/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true
+    "webpack": true,
+    "tsConfigPath": "apps/invoice-catalog/tsconfig.app.json"
   },
   "projects": {
     "common": {
@@ -15,6 +16,17 @@
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
+    },
+    "invoice-catalog": {
+      "type": "application",
+      "root": "apps/invoice-catalog",
+      "entryFile": "main",
+      "sourceRoot": "apps/invoice-catalog/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/invoice-catalog/tsconfig.app.json"
+      }
     }
-  }
+  },
+  "monorepo": true,
+  "root": "apps/invoice-catalog"
 }
