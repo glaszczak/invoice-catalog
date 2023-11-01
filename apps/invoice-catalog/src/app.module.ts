@@ -10,9 +10,9 @@ import { DatabaseModule } from '@app/common';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    DatabaseModule,
     HealthModule,
     InvoiceModule,
-    DatabaseModule,
   ],
   controllers: [AppController],
 })
