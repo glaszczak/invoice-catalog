@@ -1,81 +1,73 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import * as MOCKED_INVOICES from './invoices.json';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { ClientProxy } from '@nestjs/microservices';
+import { InvoicesRepository } from './invoices.repository';
+import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 @Injectable()
 export class InvoicesService {
-  private currentInvoices = [];
   private emittedEventsCount = 0;
 
-  constructor(@Inject('RABBITMQ_CLIENT') private rabbitmqClient: ClientProxy) {
-    this.currentInvoices = [...MOCKED_INVOICES];
+  constructor(
+    @Inject('RABBITMQ_CLIENT') private rabbitmqClient: ClientProxy,
+    private readonly invoicesRepository: InvoicesRepository,
+  ) {}
+
+  async invoice(_id: string) {
+    return this.invoicesRepository.findOne({ _id });
   }
 
-  invoices() {
+  async invoices() {
+    const invoices = await this.invoicesRepository.find({});
+
     return {
-      invoices: this.currentInvoices,
-      total: this.currentInvoices.length,
+      invoices: invoices,
+      total: invoices.length,
     };
   }
 
-  create({
-    purchaseDate,
-    supplier,
-    customer,
-    products,
-    netPrice,
-    tax,
-  }: CreateInvoiceDto) {
-    const newInvoice = {
-      id: this.getPreviousId() + 1,
-      issue_date: this.getCurrentDate(),
-      purchase_date: purchaseDate,
-      supplier: supplier,
-      customer: customer,
-      products: products,
-      net_price: netPrice,
-      tax: tax,
-      total_price: this.countTotalPrice(netPrice, tax),
-    };
+  async create(createInvoice: CreateInvoiceDto) {
+    const invoice = await this.invoicesRepository.create({
+      ...createInvoice,
+      issueDate: this.getCurrentDate(),
+      totalPrice: this.countTotalPrice(
+        createInvoice.netPrice,
+        createInvoice.tax,
+      ),
+    });
 
-    this.currentInvoices.push(newInvoice);
-
-    this.emitEvent('invoice_created', newInvoice.id);
+    this.emitEvent('invoice_created', invoice._id.toString());
 
     return {
       status: 'INVOICE_CREATED',
-      created_invoice: newInvoice,
-      total: this.currentInvoices.length,
+      created_invoice: invoice,
     };
   }
 
-  delete(id: number) {
-    const foundInvoice = this.currentInvoices.find(
-      (invoice) => invoice.id === id,
+  async update(_id: string, updateInvoice: UpdateInvoiceDto) {
+    await this.invoicesRepository.findOneAndUpdate(
+      { _id },
+      { $set: updateInvoice },
     );
 
-    if (!foundInvoice) {
-      throw new HttpException('Invoice not found', HttpStatus.NOT_FOUND);
-    }
+    this.emitEvent('invoice_updated', _id);
 
-    const filteredInvoices = this.currentInvoices.filter(
-      (invoice) => invoice.id !== id,
-    );
-    this.currentInvoices.length = 0;
-    Array.prototype.push.apply(this.currentInvoices, filteredInvoices);
+    return {
+      status: 'INVOICE_UPDATED',
+      updated_invoice_id: _id,
+      updated_data: updateInvoice,
+    };
+  }
 
-    this.emitEvent('invoice_deleted', id);
+  async delete(_id: string) {
+    await this.invoicesRepository.findOneAndDelete({ _id });
+
+    this.emitEvent('invoice_deleted', _id);
 
     return {
       status: 'INVOICE_DELETED',
-      deleted_invoice: foundInvoice,
-      total: this.currentInvoices.length,
+      deleted_invoice: _id,
     };
-  }
-
-  private getPreviousId() {
-    return this.currentInvoices[this.currentInvoices.length - 1].id;
   }
 
   private countTotalPrice(netPrice: number, tax: number) {
@@ -91,7 +83,7 @@ export class InvoicesService {
     return `${year}-${month}-${day}`;
   }
 
-  private emitEvent(eventName: string, invoiceId: number) {
+  private emitEvent(eventName: string, invoiceId: string) {
     this.rabbitmqClient.emit(eventName, {
       invoice_id: invoiceId,
       event_timestamp: new Date(),

@@ -3,9 +3,15 @@ import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { DatabaseModule } from '@app/common';
+import { InvoicesRepository } from './invoices.repository';
+import { InvoiceDocument, InvoiceSchema } from '../models/invoice.schema';
 
 @Module({
   imports: [
+    DatabaseModule.forFeature([
+      { name: InvoiceDocument.name, schema: InvoiceSchema },
+    ]),
     ClientsModule.registerAsync([
       {
         name: 'RABBITMQ_CLIENT',
@@ -18,21 +24,21 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           const queue = configService.get('RABBITMQ_QUEUE_NAME');
 
           return {
-          transport: Transport.RMQ,
-          options: {
+            transport: Transport.RMQ,
+            options: {
               urls: [`amqp://${user}:${password}@${host}:${port}`],
               queue,
-            queueOptions: {
-              durable: false,
+              queueOptions: {
+                durable: false,
+              },
             },
-          },
           };
         },
         inject: [ConfigService],
       },
     ]),
   ],
-  providers: [InvoicesService],
+  providers: [InvoicesService, InvoicesRepository],
   controllers: [InvoicesController],
   exports: [InvoicesService],
 })
