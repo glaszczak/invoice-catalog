@@ -11,7 +11,10 @@ export class RabbitMQHealthIndicator extends HealthIndicator {
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
     try {
       const connection = amqp.connect(
-        `amqp://${process.env.RABBITMQ_DEFAULT_USER}:${process.env.RABBITMQ_DEFAULT_PASS}@${process.env.RABBITMQ_HOST}:5672`,
+        `amqp://${process.env.RABBITMQ_DEFAULT_USER}
+        :${process.env.RABBITMQ_DEFAULT_PASS}
+        @${process.env.RABBITMQ_HOST}
+        :${process.env.RABBITMQ_PORT}`,
       );
 
       await connection.close();

@@ -10,22 +10,24 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       {
         name: 'RABBITMQ_CLIENT',
         imports: [ConfigModule],
-        useFactory: async (configService: ConfigService) => ({
+        useFactory: async (configService: ConfigService) => {
+          const user = configService.get('RABBITMQ_DEFAULT_USER');
+          const password = configService.get('RABBITMQ_DEFAULT_PASS');
+          const host = configService.get('RABBITMQ_HOST');
+          const port = configService.get('RABBITMQ_PORT');
+          const queue = configService.get('RABBITMQ_QUEUE_NAME');
+
+          return {
           transport: Transport.RMQ,
           options: {
-            urls: [
-              `amqp://${configService.get(
-                'RABBITMQ_DEFAULT_USER',
-              )}:${configService.get(
-                'RABBITMQ_DEFAULT_PASS',
-              )}@${configService.get('RABBITMQ_HOST')}:5672`,
-            ],
-            queue: configService.get('RABBITMQ_QUEUE_NAME'),
+              urls: [`amqp://${user}:${password}@${host}:${port}`],
+              queue,
             queueOptions: {
               durable: false,
             },
           },
-        }),
+          };
+        },
         inject: [ConfigService],
       },
     ]),

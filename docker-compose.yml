@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - '3000:3000'
-    container_name: app
-    depends_on:
-      - rabbitmq
-    environment:
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME}
-    networks:
-      - backend
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '3000:3000'
+  #   container_name: app
+  #   depends_on:
+  #     - mongodb
+  #     - rabbitmq
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - backend
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -30,6 +30,15 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     networks:
       - backend
+
+  mongodb:
+    image: mongo
+    restart: always
+    container_name: mongodb
+    ports:
+      - '27017:27017'
+    environment:
+      MONGODB_DATABASE: ${MONGODB_DATABASE}
 
 networks:
   backend:

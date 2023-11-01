@@ -4,7 +4,7 @@ import {
   HealthIndicatorResult,
   HealthCheckError,
 } from '@nestjs/terminus';
-import { InvoicesService } from 'src/invoices/invoices.service';
+import { InvoicesService } from '../../../src/invoices/invoices.service';
 
 @Injectable()
 export class EmittedEventsIndicator extends HealthIndicator {

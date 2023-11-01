@@ -50,3 +50,10 @@ curl -X DELETE -H "Content-Type: application/json" http://localhost:3000/invoice
 
 RabbitMQ management:
 http://localhost:15672/
+
+## MongoDB
+
+To run MongoDB locally using Compass use URI: 
+```
+mongodb://<MONGO_INITDB_ROOT_USERNAME>:<MONGO_INITDB_ROOT_PASSWORD>@localhost:27017
+```

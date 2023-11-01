@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { HealthModule } from './health/health.module';
 import { InvoiceModule } from './invoices/invoices.module';
 import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from '@app/common';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     HealthModule,
     InvoiceModule,
+    DatabaseModule,
   ],
   controllers: [AppController],
 })
